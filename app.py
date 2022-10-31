@@ -4,10 +4,14 @@ from botbuilder.core import BotFrameworkAdapter,BotFrameworkAdapterSettings, Tur
 import asyncio
 from luisbot import LuisBot
 
+import os
+
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
-botsettings = BotFrameworkAdapterSettings("","")
+microsoftAppId = os.environ.get('APP_AUTHORING_KEY')
+
+botsettings = BotFrameworkAdapterSettings(microsoftAppId,"")
 botadapter = BotFrameworkAdapter(botsettings)
 
 CONMEMORY = ConversationState(MemoryStorage())
