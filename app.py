@@ -9,7 +9,7 @@ import os
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
-microsoftAppId = os.environ.get('APP_AUTHORING_KEY')
+microsoftAppId = os.environ.get('MICROSOFT_APP_ID')
 
 botsettings = BotFrameworkAdapterSettings(microsoftAppId,"")
 botadapter = BotFrameworkAdapter(botsettings)
