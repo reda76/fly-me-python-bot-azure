@@ -5,6 +5,9 @@ import asyncio
 from luisbot import LuisBot
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
@@ -38,7 +41,4 @@ def messages():
     loop.run_until_complete(task)
 
 if __name__ == '__main__':
-    try:
-        app.run_app(app, host='localhost', port=3978)
-    except Exception as e:
-        raise e
+    app.run('localhost',3978)

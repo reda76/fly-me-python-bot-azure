@@ -2,6 +2,9 @@ from botbuilder.core import TurnContext,ActivityHandler
 from botbuilder.ai.luis import LuisApplication,LuisPredictionOptions,LuisRecognizer
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app_id = os.environ.get('APP_ID')
 
