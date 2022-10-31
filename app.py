@@ -38,4 +38,7 @@ def messages():
     loop.run_until_complete(task)
 
 if __name__ == '__main__':
-    app.run(port=3978)
+    try:
+        app.run_app(app, host='localhost', port=3978)
+    except Exception as e:
+        raise e
