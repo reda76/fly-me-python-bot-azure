@@ -14,8 +14,9 @@ loop = asyncio.get_event_loop()
 
 port = os.environ.get('PORT')
 microsoftAppId = os.environ.get('MICROSOFT_APP_ID')
+microsoftAppPswd = os.environ.get('MICROSOFT_APP_PSWD')
 
-botsettings = BotFrameworkAdapterSettings(microsoftAppId,"")
+botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
 botadapter = BotFrameworkAdapter(botsettings)
 
 CONMEMORY = ConversationState(MemoryStorage())
