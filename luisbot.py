@@ -1,18 +1,17 @@
 from botbuilder.core import TurnContext,ActivityHandler
 from botbuilder.ai.luis import LuisApplication,LuisPredictionOptions,LuisRecognizer
-
+from config import DefaultConfig
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+CONFIG = DefaultConfig()
 
-app_id = os.environ.get('APP_ID')
+app_id = CONFIG.APP_ID
 
-appAuthoring_Key = os.environ.get('APP_AUTHORING_KEY')
-endpointAuthoring_url = os.environ.get('ENDPOINT_AUTHORING_URL')
+appAuthoring_Key = CONFIG.APP_AUTHORING_KEY
+endpointAuthoring_url = CONFIG.ENDPOINT_AUTHORING_URL
 
-appPrediction_Key = os.environ.get('APP_PREDICTION_KEY')
-endpointPrediction_url = os.environ.get('ENDPOINT_PREDICTION_URL')
+appPrediction_Key = CONFIG.APP_PREDICTION_KEY
+endpointPrediction_url =CONFIG.ENDPOINT_PREDICTION_URL
 
 class LuisBot(ActivityHandler):
     def __init__(self):

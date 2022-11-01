@@ -3,18 +3,17 @@ from botbuilder.schema import Activity
 from botbuilder.core import BotFrameworkAdapter,BotFrameworkAdapterSettings, TurnContext, ConversationState, MemoryStorage
 import asyncio
 from luisbot import LuisBot
+from config import DefaultConfig
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+CONFIG = DefaultConfig()
 
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
-port = os.environ.get('PORT')
-microsoftAppId = os.environ.get('MICROSOFT_APP_ID')
-microsoftAppPswd = os.environ.get('MICROSOFT_APP_PSWD')
+port = CONFIG.PORT
+
+microsoftAppId = CONFIG.MICROSOFT_APP_ID
+microsoftAppPswd = CONFIG.MICROSOFT_APP_PSWD
 
 botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
 botadapter = BotFrameworkAdapter(botsettings)
