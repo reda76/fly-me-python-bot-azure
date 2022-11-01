@@ -12,6 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 loop = asyncio.get_event_loop()
 
+port = os.environ.get('PORT')
 microsoftAppId = os.environ.get('MICROSOFT_APP_ID')
 
 botsettings = BotFrameworkAdapterSettings(microsoftAppId,"")
@@ -41,4 +42,4 @@ def messages():
     loop.run_until_complete(task)
 
 if __name__ == '__main__':
-    app.run('localhost',3978)
+    app.run('localhost',port)
