@@ -5,4 +5,3 @@ botbuilder-core
 botbuilder-ai
 aiohttp
 gunicorn
-asyncio
