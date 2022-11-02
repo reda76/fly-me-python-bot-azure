@@ -4,4 +4,3 @@ botbuilder-schema
 botbuilder-core
 botbuilder-ai
 aiohttp
-gunicorn
