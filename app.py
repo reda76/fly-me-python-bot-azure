@@ -17,6 +17,7 @@ microsoftAppId = CONFIG.MICROSOFT_APP_ID
 microsoftAppPswd = CONFIG.MICROSOFT_APP_PSWD
 
 botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
+# botsettings = BotFrameworkAdapterSettings("", "")
 botadapter = BotFrameworkAdapter(botsettings)
 
 CONMEMORY = ConversationState(MemoryStorage())
@@ -43,4 +44,4 @@ def messages():
     loop.run_until_complete(task)
 
 if __name__ == '__main__':
-    app.run('localhost',port)
+    app.run('localhost',port, debug=True)

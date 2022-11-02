@@ -23,7 +23,7 @@ class LuisBot(ActivityHandler):
     async def on_turn(self, turn_context:TurnContext):
         luis_result = await self.LuisReg.recognize(turn_context)
         intent = LuisRecognizer.top_intent(luis_result)
-        await turn_context.send_activity("test")
+        await turn_context.send_activity(luis_result.text)
         print(luis_result.text)
         print()
         print(luis_result)
