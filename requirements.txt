@@ -1,6 +1,6 @@
 Flask
 python-dotenv
-botbuilder-schema
 botbuilder-core
+botbuilder-schema
 botbuilder-ai
 aiohttp
