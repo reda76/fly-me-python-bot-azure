@@ -1,7 +1,6 @@
 from dateutil.parser import parse
 from price_parser import Price
 
-import numpy as np
 import datetime
 import re
 
