@@ -42,6 +42,7 @@ def messages():
         botadapter.process_activity(activity,auth_header,call_fun)
         )
     loop.run_until_complete(task)
+    print(CONMEMORY)
 
 if __name__ == '__main__':
     app.run('localhost',port, debug=True)
