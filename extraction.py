@@ -52,29 +52,32 @@ def extract(result):
     
     list_information_fly = ["or_city", "dst_city", "str_date", "end_date", "budget"]
     
-    dict_fly = result["entities"]["FlyOrder"][0]['Fly'][0]
     
-    for inf_fly in list_information_fly:
-        if inf_fly == "budget":
-            try:
-                dict_information[inf_fly] = parse_price(dict_fly[inf_fly][0])
-            except:
-                dict_information[inf_fly] = "None" 
-        elif inf_fly == "str_date":
-            try:
-                dict_information[inf_fly] = parse_date(dict_fly[inf_fly][0]).date()
-            except:
-                dict_information[inf_fly] = "None"
-        elif inf_fly == "end_date":
-            try:
-                dict_information[inf_fly] = parse_date(dict_fly[inf_fly][0]).date()
-            except:
-                dict_information[inf_fly] = "None"
-        else:
-            try:
-                dict_information[inf_fly] = dict_fly[inf_fly][0]
-            except:
-                dict_information[inf_fly] = "None"
+    try:
+        dict_fly = result["entities"]["FlyOrder"][0]['Fly'][0]
+        for inf_fly in list_information_fly:
+            if inf_fly == "budget":
+                try:
+                    dict_information[inf_fly] = parse_price(dict_fly[inf_fly][0])
+                except:
+                    dict_information[inf_fly] = "None" 
+            elif inf_fly == "str_date":
+                try:
+                    dict_information[inf_fly] = parse_date(dict_fly[inf_fly][0]).date()
+                except:
+                    dict_information[inf_fly] = "None"
+            elif inf_fly == "end_date":
+                try:
+                    dict_information[inf_fly] = parse_date(dict_fly[inf_fly][0]).date()
+                except:
+                    dict_information[inf_fly] = "None"
+            else:
+                try:
+                    dict_information[inf_fly] = dict_fly[inf_fly][0]
+                except:
+                    dict_information[inf_fly] = "None"
+    except:
+        pass
     
     liste_geo = []
     # Il peut y avoir plusieurs informations stockées dans la géographie
@@ -86,29 +89,64 @@ def extract(result):
         liste_geo = result["entities"]["geographyV2"][0]["location"]
     dict_information["geography"] = liste_geo  
         
+    liste_datetime_brute = []
     liste_datetime = []
-    date_time_brute = result["entities"]["datetime"][0]["timex"][0]
-    
+    date_time_brute = result["entities"]["datetime"]
     # Le tuple est dans un string mais le contenu du tuple ne l'est pas
     # nous de devons donc ajouter des string à chaque élément
-    date_time_brute = re.sub(r"\(", "('", date_time_brute)
-    date_time_brute = re.sub(r"\)", "')", date_time_brute)
-    date_time_brute = re.sub(r",", "','", date_time_brute)
-    try:
-        date_time_brute = eval(date_time_brute)
-    except:
-        date_time_brute = str(date_time_brute)
-    if type(date_time_brute) is tuple:
-        for i in date_time_brute:
-            if len(date_time_brute) != 0:
-                if i[0] != "P":
-                    liste_datetime.append(parse_date(i).date())
-    else:
-        if len(date_time_brute) != 0:
-            if date_time_brute[0] != "P":
-                liste_datetime.append(parse_date(date_time_brute).date())
+    for i in date_time_brute:
+        i = i["timex"][0]
+        i = re.sub(r"\(", "('", i)
+        i = re.sub(r"\)", "')", i)
+        i = re.sub(r",", "','", i)
+        liste_datetime_brute.append(i)
+
+    for date in liste_datetime_brute:
+        try:
+            date = eval(date)
+        except:
+            date = str(date)
+        if type(date) is tuple:
+            for i in date:
+                if len(date) != 0:
+                    if i[0] != "P":
+                        liste_datetime.append(parse_date(i).date())
+        else:
+            if isinstance(date, int) == False and len(date) != 0:
+                if date[0] != "P":
+                    liste_datetime.append(parse_date(date).date())
     dict_information["datetimeV2"] = liste_datetime
     
     dict_information["money"] = float(result["entities"]["money"][0]['number'])
+    
+    # Replace les valeurs None de base par les valeurs prebuilt
+    if dict_information["or_city"] == 'None':
+        if type(dict_information['geography']) is list:
+            try:
+                dict_information["or_city"] = dict_information['geography'][1]
+            except:
+                pass
+        
+    if dict_information["dst_city"] == 'None':
+        if type(dict_information['geography']) is list:
+            dict_information["dst_city"] = dict_information['geography'][0]
+        else:
+            dict_information["dst_city"] = dict_information['geography']
+
+    if dict_information["str_date"] == 'None':
+        if type(dict_information['datetimeV2']) is list:
+            dict_information["str_date"] = dict_information['datetimeV2'][0]
+        else:
+            dict_information["str_date"] = dict_information['datetimeV2']
+
+    if dict_information["end_date"] == 'None':
+        if type(dict_information['datetimeV2']) is list:
+            try:
+                dict_information["end_date"] = dict_information['datetimeV2'][1]
+            except:
+                pass
+
+    if dict_information["budget"] == 'None':
+        dict_information["budget"] = dict_information['money']
     
     return dict_information

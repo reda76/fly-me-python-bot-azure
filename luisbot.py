@@ -45,3 +45,4 @@ class LuisBot(ActivityHandler):
         money = dict_extract["money"]
 
         await turn_context.send_activity(f"Do you want to go to {destination} from {origine} on {start_date} to {end_date} for a budget of {budget} ?")
+        # await turn_context.send_activity(dict_extract)
