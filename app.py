@@ -21,7 +21,7 @@ botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
 botadapter = BotFrameworkAdapter(botsettings)
 
 CONMEMORY = ConversationState(MemoryStorage())
-botdialog = LuisBot()
+botdialog = LuisBot(CONMEMORY)
 
 @app.route("/api/messages",methods=["POST"])
 def messages():

@@ -1,8 +1,9 @@
 Flask
 python-dotenv
-botbuilder-core
-botbuilder-schema
-botbuilder-ai
+botbuilder-core==4.14.2
+botbuilder-schema==4.14.2
+botbuilder-ai==4.14.2
+botbuilder-dialogs==4.14.2
 python-dateutil
 price-parser
 aiohttp

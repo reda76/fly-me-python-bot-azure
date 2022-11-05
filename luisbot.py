@@ -1,11 +1,12 @@
-import re
 import json
 
-from botbuilder.core import TurnContext,ActivityHandler
+from botbuilder.core import TurnContext,ActivityHandler, ConversationState, MessageFactory
 from botbuilder.ai.luis import LuisApplication,LuisRecognizer, LuisRecognizerOptionsV3
+from botbuilder.dialogs import DialogSet, WaterfallDialog, WaterfallStepContext, DialogTurnResult
+from botbuilder.dialogs.prompts import TextPrompt, NumberPrompt, PromptOptions
 
 from config import DefaultConfig
-from extraction import extract, result_to_json, message_si_manque_info
+from extraction import extract, result_to_json, message_si_manque_info, none_liste
 
 CONFIG = DefaultConfig()
 
@@ -18,22 +19,30 @@ appPrediction_Key = CONFIG.APP_PREDICTION_KEY
 endpointPrediction_url =CONFIG.ENDPOINT_PREDICTION_URL
 
 class LuisBot(ActivityHandler):
-    def __init__(self):
+    def __init__(self, conversation:ConversationState):
         luis_app = LuisApplication(app_id, appPrediction_Key, endpointPrediction_url)
         luis_option = LuisRecognizerOptionsV3(include_all_intents=False,include_instance_data=False)
         self.LuisReg = LuisRecognizer(luis_app,luis_option,True)
-    
-    async def on_turn(self, turn_context:TurnContext):
-        luis_result = await self.LuisReg.recognize(turn_context)
-        intent = LuisRecognizer.top_intent(luis_result)
+        self.con_statea = conversation
+        self.state_prop = self.con_statea.create_property("dialog_set")
+        self.dialog_set = DialogSet(self.state_prop)
+        self.dialog_set.add(TextPrompt("text_prompt"))
+        self.dialog_set.add(WaterfallDialog("main_dialog", [self.GetBooking, self.Verification, self.VerificationDeux, self.VerificationTrois]))
 
+    turn = []
+
+    async def GetBooking(self, waterfall_step:WaterfallStepContext):
+        return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text("Hello ! You can book your flight here, I'm listening.")))
+
+    async def Verification(self, waterfall_step:WaterfallStepContext) -> DialogTurnResult:
+        luis_result = await self.LuisReg.recognize(waterfall_step.context)
+        waterfall_step.values["luis_result"] = luis_result
         # Nous avons besoin de modifier une valeur, le dictionnaire return dans la valeur de la clé "Booking" ceci :
         # <botbuilder.core.intent_score.IntentScore object at 0x000001C516A00910>, et renvoie donc une erreur de syntaxe
         # Nous devons donc rentre le dictionnaire en string, et ajouté des strings à cette partie pour avoir un dictionnaire normal
         luis_result = result_to_json(luis_result)
-
         dict_extract = extract(luis_result)
-        
+        waterfall_step.values["dict_extract"] = dict_extract
         # 8 'None' indique que le message n'a pas été comprit par le bot
         count = 0
         for key, value in dict_extract.items():
@@ -47,5 +56,85 @@ class LuisBot(ActivityHandler):
             message= "Sorry, I did not understand your request, can you repeat please?"
         else:
             message = message_si_manque_info(dict_extract)
+        return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
 
-        await turn_context.send_activity(message)
+
+    async def VerificationDeux(self, waterfall_step:WaterfallStepContext) -> DialogTurnResult:
+        luis_result_2 = await self.LuisReg.recognize(waterfall_step.context)
+        waterfall_step.values["luis_result_2"] = luis_result_2
+        luis_result = waterfall_step.values["luis_result"]
+
+        dict_extract = waterfall_step.values["dict_extract"]
+        luis_result_2 = result_to_json(luis_result_2)
+        dict_extract_2 = extract(luis_result_2)
+
+        liste_info_manque = none_liste(dict_extract)
+        for i in liste_info_manque:
+            dict_extract[i] = dict_extract_2[i]
+        
+        waterfall_step.values["dict_extract"] = dict_extract
+        if luis_result_2["text"] in ['No', "no", "Nop", "nop", "Absolutely no", "Absolutely No", "absolutely no", "absolutely No"]:
+            await waterfall_step._turn_context.send_activity("Sorry, we'll put you through to an advisor.")
+        elif luis_result_2["text"] not in ['Yes', "yes", "yep", "Yep", "yeah", "Yeah"]:
+            # 8 'None' indique que le message n'a pas été comprit par le bot
+            count = 0
+            for key, value in dict_extract.items():
+                if key == 'geography':
+                    if value[0] == 'None':
+                        count += 1
+                elif value == 'None':
+                    count += 1
+
+            if count == 8:
+                message= "Sorry, I did not understand your request, can you repeat please?"
+            else:
+                message = message_si_manque_info(dict_extract)
+            return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
+        else:
+            await waterfall_step._turn_context.send_activity("Thank you !")
+            with open("turn", "w") as fp:
+                json.dump(result_to_json(luis_result), fp)
+            return await waterfall_step.end_dialog()
+
+    async def VerificationTrois(self, waterfall_step:WaterfallStepContext) -> DialogTurnResult:
+        luis_result_3 = await self.LuisReg.recognize(waterfall_step.context)
+        waterfall_step.values["luis_result_3"] = luis_result_3
+        
+        dict_extract = waterfall_step.values["dict_extract"]
+        luis_result_3 = result_to_json(luis_result_3)
+        dict_extract_3 = extract(luis_result_3)
+
+        liste_info_manque = none_liste(dict_extract)
+        for i in liste_info_manque:
+            dict_extract[i] = dict_extract_3[i]
+        
+        waterfall_step.values["dict_extract"] = dict_extract
+        if luis_result_3["text"] in ['No', "no", "Nop", "nop", "Absolutely no", "Absolutely No", "absolutely no", "absolutely No"]:
+            await waterfall_step._turn_context.send_activity("Sorry, we'll put you through to an advisor.")
+        elif luis_result_3["text"] not in ['Yes', "yes", "yep", "Yep", "yeah", "Yeah"]:
+            count = 0
+            for key, value in dict_extract.items():
+                if key == 'geography':
+                    if value[0] == 'None':
+                        count += 1
+                elif value == 'None':
+                    count += 1
+
+            if count == 8:
+                message= "Sorry, I did not understand your request, can you repeat please?"
+            else:
+                message = message_si_manque_info(dict_extract)
+            return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
+        else:
+            await waterfall_step._turn_context.send_activity("Thank you !")
+            return await waterfall_step.end_dialog()
+
+    async def on_turn(self, turn_context:TurnContext):
+        dialog_context = await self.dialog_set.create_context(turn_context)
+
+        if(dialog_context.active_dialog is not None):
+            await dialog_context.continue_dialog()
+        else:
+            await dialog_context.begin_dialog("main_dialog")
+
+        await self.con_statea.save_changes(turn_context)
