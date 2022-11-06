@@ -47,6 +47,9 @@ class LuisBot(ActivityHandler):
             if key == 'geography':
                 if value[0] == 'None':
                     count += 1
+            if key == 'datetimeV2':
+                if value[0] == 'None':
+                    count += 1
             elif value == 'None':
                 count += 1
 
@@ -83,6 +86,9 @@ class LuisBot(ActivityHandler):
             count = 0
             for key, value in dict_extract.items():
                 if key == 'geography':
+                    if value[0] == 'None':
+                        count += 1
+                if key == 'datetimeV2':
                     if value[0] == 'None':
                         count += 1
                 elif value == 'None':
@@ -128,9 +134,11 @@ class LuisBot(ActivityHandler):
                 if key == 'geography':
                     if value[0] == 'None':
                         count += 1
+                if key == 'datetimeV2':
+                    if value[0] == 'None':
+                        count += 1
                 elif value == 'None':
                     count += 1
-
             if count == 8:
                 message = "Sorry, we'll put you through to an advisor."
                 luis_result = waterfall_step.values["luis_result"]
