@@ -1,8 +1,10 @@
 from dateutil.parser import parse
 from price_parser import Price
 
-import datetime
+from datetime import datetime
 import re
+import json
+
 
 
 def result_to_json(result):
@@ -215,3 +217,22 @@ def none_liste(dict_extract):
             liste_info_manque.append(key)
             
     return liste_info_manque
+
+
+def export_json(luis_result, luis_result_2, luis_result_3):
+    now = datetime.now()
+    list_result = []
+
+    if luis_result != 'None':
+        list_result.append(luis_result)
+    
+    if luis_result_2 != 'None':
+        list_result.append(luis_result_2)
+    
+    if luis_result_3 != 'None':
+        list_result.append(luis_result_3)
+    
+    dt_string = now.strftime("%d-%m-%Y %H-%M-%S")
+
+    with open("data/"+dt_string+".json", "w") as final:
+        json.dump(list_result, final)
