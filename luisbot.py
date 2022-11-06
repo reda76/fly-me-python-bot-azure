@@ -3,7 +3,7 @@ import json
 from botbuilder.core import TurnContext,ActivityHandler, ConversationState, MessageFactory
 from botbuilder.ai.luis import LuisApplication,LuisRecognizer, LuisRecognizerOptionsV3
 from botbuilder.dialogs import DialogSet, WaterfallDialog, WaterfallStepContext, DialogTurnResult
-from botbuilder.dialogs.prompts import TextPrompt, NumberPrompt, PromptOptions
+from botbuilder.dialogs.prompts import TextPrompt, PromptOptions
 
 from config import DefaultConfig
 from extraction import extract, result_to_json, message_si_manque_info, none_liste
@@ -124,7 +124,12 @@ class LuisBot(ActivityHandler):
                 message= "Sorry, I did not understand your request, can you repeat please?"
             else:
                 message = message_si_manque_info(dict_extract)
-            return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
+
+            if message.startswith('Sorry'):
+                message = "Sorry, we'll put you through to an advisor."
+                return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
+            else:
+                return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
         else:
             await waterfall_step._turn_context.send_activity("Thank you !")
             return await waterfall_step.end_dialog()
