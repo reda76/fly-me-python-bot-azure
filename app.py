@@ -16,12 +16,12 @@ port = CONFIG.PORT
 microsoftAppId = CONFIG.MICROSOFT_APP_ID
 microsoftAppPswd = CONFIG.MICROSOFT_APP_PSWD
 
-botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
-# botsettings = BotFrameworkAdapterSettings("", "")
+# botsettings = BotFrameworkAdapterSettings(microsoftAppId, microsoftAppPswd)
+botsettings = BotFrameworkAdapterSettings("", "")
 botadapter = BotFrameworkAdapter(botsettings)
 
 CONMEMORY = ConversationState(MemoryStorage())
-botdialog = LuisBot(CONMEMORY)
+botdialog = LuisBot(CONMEMORY)  
 
 @app.route("/api/messages",methods=["POST"])
 def messages():

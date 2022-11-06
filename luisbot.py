@@ -139,7 +139,7 @@ class LuisBot(ActivityHandler):
                         count += 1
                 elif value == 'None':
                     count += 1
-            if count == 8:
+            if count != 0:
                 message = "Sorry, we'll put you through to an advisor."
                 luis_result = waterfall_step.values["luis_result"]
                 luis_result_2 = waterfall_step.values["luis_result_2"]
