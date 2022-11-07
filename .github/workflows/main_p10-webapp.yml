@@ -40,9 +40,9 @@ jobs:
             . 
             !venv/
       
-      - name: Test with pytest
+      - name: Test with unittest
         run: |
-          test_unittest
+          python test_unittest.py
 
   deploy:
     runs-on: ubuntu-latest
