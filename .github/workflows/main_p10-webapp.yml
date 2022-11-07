@@ -41,8 +41,8 @@ jobs:
             !venv/
       
       - name: Test with pytest
-      run: |
-        test_unittest
+        run: |
+          test_unittest
 
   deploy:
     runs-on: ubuntu-latest
