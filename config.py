@@ -19,7 +19,7 @@ class DefaultConfig:
     MICROSOFT_APP_ID = os.environ.get("MICROSOFT_APP_ID")
     MICROSOFT_APP_PSWD = os.environ.get("MICROSOFT_APP_PSWD")
 
-    INSIGHT_INSTRUMENT_KEY = "85816a92-b891-4f30-bcbd-6aededf8f268"
-    INSIGHT_KEY = "lsse0q040hdls5xlfpo136cdjeqbww0svnraxewb"
+    INSIGHT_INSTRUMENT_KEY = os.environ.get("INSIGHT_INSTRUMENT_KEY")
+    INSIGHT_KEY = os.environ.get("INSIGHT_KEY")
 
     PORT = os.environ.get("PORT")
