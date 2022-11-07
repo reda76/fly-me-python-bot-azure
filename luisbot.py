@@ -119,7 +119,7 @@ class LuisBot(ActivityHandler):
         luis_result_3 = result_to_json(luis_result_3)
         waterfall_step.values["luis_result_3"] = luis_result_3
         dict_extract_3 = extract(luis_result_3)
-
+    
         liste_info_manque = none_liste(dict_extract)
         for i in liste_info_manque:
             dict_extract[i] = dict_extract_3[i]

@@ -1,10 +1,6 @@
 from dateutil.parser import parse
 from price_parser import Price
-
-from datetime import datetime
 import re
-
-
 
 def result_to_json(result):
     try:
@@ -27,11 +23,11 @@ def result_to_json(result):
 
 # Fonction de formatage des budgets et dates
 def parse_price(price):
-    try:
-        price = Price.fromstring(price, decimal_separator=".")
+    price = Price.fromstring(price, decimal_separator=".")
+    if price.amount == None:
+        return 'None'
+    else:
         return price.amount_float
-    except:
-        return "None"
 
 def parse_date(date):
     try:
