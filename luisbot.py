@@ -37,7 +37,11 @@ class LuisBot(ActivityHandler):
         self.dialog_set.add(WaterfallDialog("main_dialog", [self.GetBooking, self.Verification, self.VerificationDeux, self.VerificationTrois]))
 
     async def GetBooking(self, waterfall_step:WaterfallStepContext):
-        return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text("Hello ! You can book your flight here, I'm listening.")))
+        message = "Hello ! You can book your flight here, I'm listening."
+        waterfall_step.values["history"] = {}
+        waterfall_step.values["history"]["bot1"] = message
+        return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
+
 
     async def Verification(self, waterfall_step:WaterfallStepContext) -> DialogTurnResult:
         luis_result = await self.LuisReg.recognize(waterfall_step.context)
@@ -48,6 +52,7 @@ class LuisBot(ActivityHandler):
         waterfall_step.values["luis_result"] = luis_result
         dict_extract = extract(luis_result)
         waterfall_step.values["dict_extract"] = dict_extract
+        waterfall_step.values["history"]["user1"] = luis_result["text"]
         # 8 'None' indique que le message n'a pas été comprit par le bot
         count = 0
         for key, value in dict_extract.items():
@@ -62,8 +67,10 @@ class LuisBot(ActivityHandler):
 
         if count == 8:
             message= "Sorry, I did not understand your request, can you repeat please?"
+            waterfall_step.values["history"]["bot2"] = message
         else:
             message = message_si_manque_info(dict_extract)
+            waterfall_step.values["history"]["bot2"] = message
         return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
 
 
@@ -76,19 +83,24 @@ class LuisBot(ActivityHandler):
         waterfall_step.values["luis_result_2"] = luis_result_2
         dict_extract_2 = extract(luis_result_2)
 
+        waterfall_step.values["history"]["user2"] = luis_result_2["text"]
+
         liste_info_manque = none_liste(dict_extract)
         for i in liste_info_manque:
             dict_extract[i] = dict_extract_2[i]
         
         waterfall_step.values["dict_extract"] = dict_extract
         if luis_result_2["text"] in ['No', "no", "Nop", "nop", "Absolutely no", "Absolutely No", "absolutely no", "absolutely No"]:
-            await waterfall_step._turn_context.send_activity("Sorry, we'll put you through to an advisor.")
+            message = "Sorry, we'll put you through to an advisor."
+            waterfall_step.values["history"]["bot3"] = message
+            await waterfall_step._turn_context.send_activity(message)
             luis_result = waterfall_step.values["luis_result"]
             luis_result_2 = waterfall_step.values["luis_result_2"]
             # Renvoie à l'application Insight le json et le dictionnaire
             properties = {'custom_dimensions': {'turn': str([luis_result, luis_result_2]), 
             'information': str(dict_extract), 
-            'reason': "The bot to propose a reservation that does not comply with the user's request"}}
+            'reason': "The bot to propose a reservation that does not comply with the user's request",
+            'history': str(waterfall_step.values["history"])}}
             logger.warning('action', extra=properties)
         elif luis_result_2["text"] not in ['Yes', "yes", "yep", "Yep", "yeah", "Yeah"]:
             # 8 'None' indique que le message n'a pas été comprit par le bot
@@ -105,11 +117,15 @@ class LuisBot(ActivityHandler):
 
             if count == 8:
                 message= "Sorry, I did not understand your request, can you repeat please?"
+                waterfall_step.values["history"]["bot3"] = message
             else:
                 message = message_si_manque_info(dict_extract)
+                waterfall_step.values["history"]["bot3"] = message
             return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))
         else:
-            await waterfall_step._turn_context.send_activity("Thank you !")
+            message = "Thank you !"
+            await waterfall_step._turn_context.send_activity(message)
+            waterfall_step.values["history"]["bot3"] = message
             return await waterfall_step.end_dialog()
 
     async def VerificationTrois(self, waterfall_step:WaterfallStepContext) -> DialogTurnResult:
@@ -120,20 +136,26 @@ class LuisBot(ActivityHandler):
         waterfall_step.values["luis_result_3"] = luis_result_3
         dict_extract_3 = extract(luis_result_3)
     
+        waterfall_step.values["history"]["user3"] = luis_result_3["text"]
+
         liste_info_manque = none_liste(dict_extract)
         for i in liste_info_manque:
             dict_extract[i] = dict_extract_3[i]
         
         waterfall_step.values["dict_extract"] = dict_extract
         if luis_result_3["text"] in ['No', "no", "Nop", "nop", "Absolutely no", "Absolutely No", "absolutely no", "absolutely No"]:
-            await waterfall_step._turn_context.send_activity("Sorry, we'll put you through to an advisor.")
+            message = "Sorry, we'll put you through to an advisor."
+            waterfall_step.values["history"]["bot4"] = message
+            print(waterfall_step.values["history"])
+            await waterfall_step._turn_context.send_activity(message)
             luis_result = waterfall_step.values["luis_result"]
             luis_result_2 = waterfall_step.values["luis_result_2"]
             luis_result_3 = waterfall_step.values["luis_result_3"]
             # Renvoie à l'application Insight le json et le dictionnaire
             properties = {'custom_dimensions': {'turn': str([luis_result, luis_result_2, luis_result_3]), 
             'information': str(dict_extract), 
-            'reason': "The bot to propose a reservation that does not comply with the user's request"}}
+            'reason': "The bot to propose a reservation that does not comply with the user's request",
+            'history': str(waterfall_step.values["history"])}}
             logger.warning('action', extra=properties)
         elif luis_result_3["text"] not in ['Yes', "yes", "yep", "Yep", "yeah", "Yeah"]:
             count = 0
@@ -148,16 +170,20 @@ class LuisBot(ActivityHandler):
                     count += 1
             if count != 0:
                 message = "Sorry, we'll put you through to an advisor."
+                waterfall_step.values["history"]["bot4"] = message
                 luis_result = waterfall_step.values["luis_result"]
                 luis_result_2 = waterfall_step.values["luis_result_2"]
                 luis_result_3 = waterfall_step.values["luis_result_3"]
                 properties = {'custom_dimensions': {'turn': str([luis_result, luis_result_2, luis_result_3]), 
                 'information': str(dict_extract), 
-                'reason': "The bot failed to understand the user's request after the 3rd exchange"}}
+                'reason': "The bot failed to understand the user's request after the 3rd exchange",
+                'history': str(waterfall_step.values["history"])}}
                 logger.warning('action', extra=properties)
                 return await waterfall_step.prompt("text_prompt", PromptOptions(prompt=MessageFactory.text(message)))   
         else:
-            await waterfall_step._turn_context.send_activity("Thank you !")
+            message = "Thank you !"
+            await waterfall_step._turn_context.send_activity(message)
+            waterfall_step.values["history"]["bot4"] = message
             return await waterfall_step.end_dialog()
 
     async def on_turn(self, turn_context:TurnContext):
