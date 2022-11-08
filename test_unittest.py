@@ -27,7 +27,7 @@ class Test_Testextraction(unittest.TestCase):
 
     def test_parse_date(self):
         dict_test = {"AUG 27": datetime.datetime(2022, 8, 27, 0, 0), 
-                    "september": datetime.datetime(2022, 9, 7, 0, 0),
+                    "september 12": datetime.datetime(2022, 9, 12, 0, 0),
                     "15 may 2023": datetime.datetime(2023, 5, 15, 0, 0)}
         for key,value in dict_test.items():
             self.assertEqual(extraction.parse_date(key), value)
